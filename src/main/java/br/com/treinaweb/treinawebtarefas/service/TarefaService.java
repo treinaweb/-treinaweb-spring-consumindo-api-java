@@ -11,23 +11,19 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.treinaweb.treinawebtarefas.domain.Tarefa;
-import br.com.treinaweb.treinawebtarefas.repository.TarefaRepository;
 
 @Service
 public class TarefaService {
 
     private static String webService = "http://localhost:3002/api/";
-    
-    @Autowired
-    private TarefaRepository repository;
 
     public List<Tarefa> listarTarefas() {
         String url = webService + "tarefas";
@@ -102,6 +98,22 @@ public class TarefaService {
     }
 
     public void editarTarefa(Tarefa tarefa) {
-        repository.save(tarefa);
+        String url = webService + "tarefas?id=" + tarefa.getId();
+
+        try {
+            CloseableHttpClient client = HttpClientBuilder.create().build();
+            HttpPut httpPut = new HttpPut(url);
+
+            ObjectMapper mapper = new ObjectMapper();
+            String tarefaJson = mapper.writeValueAsString(tarefa);
+
+            httpPut.setEntity(new StringEntity(tarefaJson));
+            httpPut.setHeader("Accept", "application/json");
+            httpPut.setHeader("Content-type", "application/json");
+
+            client.execute(httpPut);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
