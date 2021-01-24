@@ -1,7 +1,16 @@
 package br.com.treinaweb.treinawebtarefas.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,12 +19,30 @@ import br.com.treinaweb.treinawebtarefas.repository.TarefaRepository;
 
 @Service
 public class TarefaService {
+
+    private static String webService = "http://localhost:3002/api/";
     
     @Autowired
     private TarefaRepository repository;
 
     public List<Tarefa> listarTarefas() {
-        return repository.findAll();
+        String url = webService + "tarefas";
+
+        List<Tarefa> tarefas;
+
+        try {
+            CloseableHttpClient client = HttpClientBuilder.create().build();
+            CloseableHttpResponse response = client.execute(new HttpGet(url));
+            String body = EntityUtils.toString(response.getEntity());
+
+            ObjectMapper mapper = new ObjectMapper();
+            tarefas = mapper.readValue(body, new TypeReference<List<Tarefa>>(){});
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            tarefas = new ArrayList<Tarefa>();
+        }
+
+        return tarefas;
     }
 
     public Tarefa listarTarefaPorId(String id) {
