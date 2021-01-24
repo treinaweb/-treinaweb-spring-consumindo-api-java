@@ -46,7 +46,23 @@ public class TarefaService {
     }
 
     public Tarefa listarTarefaPorId(String id) {
-        return repository.getOne(id);
+        String url = webService + "tarefas?id=" + id;
+
+        Tarefa tarefa;
+
+        try {
+            CloseableHttpClient client = HttpClientBuilder.create().build();
+            CloseableHttpResponse response = client.execute(new HttpGet(url));
+            String body = EntityUtils.toString(response.getEntity());
+
+            ObjectMapper mapper = new ObjectMapper();
+            tarefa = mapper.readValue(body, Tarefa.class);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            tarefa = new Tarefa();
+        }
+
+        return tarefa;
     }
 
     public void removerTarefaPorId(String id) {
