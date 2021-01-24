@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -66,7 +67,14 @@ public class TarefaService {
     }
 
     public void removerTarefaPorId(String id) {
-        repository.deleteById(id);
+        String url = webService + "tarefas?id=" + id;
+
+        try {
+            CloseableHttpClient client = HttpClientBuilder.create().build();
+            client.execute(new HttpDelete(url));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     public void cadastrarTarefa(Tarefa tarefa) {
